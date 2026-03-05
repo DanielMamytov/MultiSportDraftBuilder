@@ -1,0 +1,684 @@
+{
+  "project": {
+    "name": "MultiSport Draft Builder",
+    "platform": [
+      "Android"
+    ],
+    "language": "Kotlin",
+    "minimumOSVersion": "8.0",
+    "architecture": "MVVM",
+    "dependencies": [
+      "androidx.lifecycle",
+      "androidx.navigation",
+      "kotlinx.serialization",
+      "material-components",
+      "room",
+      "datastore",
+      "lottie"
+    ],
+    "version": "1.0"
+  },
+  "designSystem": {
+    "theme": "Dark",
+    "colors": {
+      "background": "#181828",
+      "primaryAccent": "#A259FF",
+      "secondaryAccent": "#7C3AED",
+      "surface": "#23233A",
+      "card": "#24243C",
+      "textPrimary": "#FFFFFF",
+      "textSecondary": "#C7BFFF",
+      "divider": "#373758",
+      "success": "#3DDC97",
+      "warning": "#FFB300",
+      "error": "#FF4F64",
+      "info": "#7F7FFF",
+      "onPrimary": "#FFFFFF",
+      "onSecondary": "#FFFFFF"
+    },
+    "typography": {
+      "fontFamily": "Inter",
+      "headline1": 32,
+      "headline2": 24,
+      "headline3": 20,
+      "body1": 16,
+      "body2": 14,
+      "caption": 12,
+      "button": 16
+    },
+    "spacing": {
+      "xs": 4,
+      "sm": 8,
+      "md": 16,
+      "lg": 24,
+      "xl": 32
+    },
+    "radius": {
+      "xs": 4,
+      "sm": 8,
+      "md": 16,
+      "lg": 24
+    },
+    "elevation": {
+      "card": 2,
+      "modal": 8,
+      "appBar": 4
+    }
+  },
+  "app": {
+    "entryPoint": "MainActivity.kt",
+    "lifecycle": {
+      "onCreate": "initializeTheme, checkDependencies, loadUserData",
+      "onResume": "refreshData, checkNotifications",
+      "onPause": "saveState",
+      "onDestroy": "clearTempData"
+    },
+    "preloader": {
+      "animationType": "CircularLoader",
+      "initializationLogic": "Load theme, check local storage, verify dependencies, initialize analytics",
+      "dependencyChecks": [
+        "Room DB",
+        "DataStore",
+        "Network"
+      ],
+      "themeLoading": "Apply dark theme and accent colors",
+      "transitionLogic": "Fade out and navigate to Onboarding after initialization"
+    },
+    "navigation": {
+      "type": "BottomTabNavigation",
+      "structure": [
+        {
+          "tab": "Home",
+          "screens": [
+            "HomeScreen"
+          ]
+        },
+        {
+          "tab": "Profiles",
+          "screens": [
+            "ProfileListScreen",
+            "ProfileDetailScreen",
+            "ProfileEditScreen"
+          ]
+        },
+        {
+          "tab": "Draft",
+          "screens": [
+            "DisciplineSelectionScreen",
+            "SkillDistributionScreen",
+            "AccentSelectionScreen"
+          ]
+        },
+        {
+          "tab": "Analytics",
+          "screens": [
+            "AnalyticsScreen",
+            "ComparisonScreen"
+          ]
+        },
+        {
+          "tab": "Settings",
+          "screens": [
+            "SettingsScreen"
+          ]
+        }
+      ]
+    },
+    "features": [
+      {
+        "screenName": "PreloaderScreen",
+        "view": "PreloaderView",
+        "viewModel": "PreloaderViewModel",
+        "screenType": "preloader",
+        "primaryPurpose": "App initialization and dependency checks",
+        "userActions": [],
+        "inputFields": [],
+        "validationReference": "globalRules",
+        "dataReadFrom": "local",
+        "dataWriteTo": "memory",
+        "cachingPolicy": "none",
+        "offlineBehavior": "full",
+        "connectedServices": [
+          "analytics"
+        ],
+        "navigationLinks": [
+          "OnboardingScreen1"
+        ],
+        "loadingState": "showCircularLoader",
+        "emptyState": "none",
+        "errorState": "showErrorDialog",
+        "retryBehavior": "retryInitialization"
+      },
+      {
+        "screenName": "OnboardingScreen1",
+        "view": "OnboardingIntroView",
+        "viewModel": "OnboardingViewModel",
+        "screenType": "onboarding",
+        "primaryPurpose": "Introduce hybrid athlete concept",
+        "userActions": [
+          "Next"
+        ],
+        "inputFields": [],
+        "validationReference": "globalRules",
+        "dataReadFrom": "static",
+        "dataWriteTo": "memory",
+        "cachingPolicy": "none",
+        "offlineBehavior": "full",
+        "connectedServices": [],
+        "navigationLinks": [
+          "OnboardingScreen2"
+        ],
+        "loadingState": "none",
+        "emptyState": "none",
+        "errorState": "showErrorToast",
+        "retryBehavior": "restartOnboarding"
+      },
+      {
+        "screenName": "OnboardingScreen2",
+        "view": "OnboardingDisciplinesView",
+        "viewModel": "OnboardingViewModel",
+        "screenType": "onboarding",
+        "primaryPurpose": "Explain discipline selection and skill distribution",
+        "userActions": [
+          "Next",
+          "Back"
+        ],
+        "inputFields": [],
+        "validationReference": "globalRules",
+        "dataReadFrom": "static",
+        "dataWriteTo": "memory",
+        "cachingPolicy": "none",
+        "offlineBehavior": "full",
+        "connectedServices": [],
+        "navigationLinks": [
+          "OnboardingScreen3",
+          "OnboardingScreen1"
+        ],
+        "loadingState": "none",
+        "emptyState": "none",
+        "errorState": "showErrorToast",
+        "retryBehavior": "restartOnboarding"
+      },
+      {
+        "screenName": "OnboardingScreen3",
+        "view": "OnboardingSimulationView",
+        "viewModel": "OnboardingViewModel",
+        "screenType": "onboarding",
+        "primaryPurpose": "Show profile comparison and simulation features",
+        "userActions": [
+          "Finish",
+          "Back"
+        ],
+        "inputFields": [],
+        "validationReference": "globalRules",
+        "dataReadFrom": "static",
+        "dataWriteTo": "memory",
+        "cachingPolicy": "none",
+        "offlineBehavior": "full",
+        "connectedServices": [],
+        "navigationLinks": [
+          "HomeScreen",
+          "OnboardingScreen2"
+        ],
+        "loadingState": "none",
+        "emptyState": "none",
+        "errorState": "showErrorToast",
+        "retryBehavior": "restartOnboarding"
+      },
+      {
+        "screenName": "HomeScreen",
+        "view": "HomeView",
+        "viewModel": "HomeViewModel",
+        "screenType": "home",
+        "primaryPurpose": "Main dashboard and quick actions",
+        "userActions": [
+          "CreateProfile",
+          "ViewAnalytics",
+          "OpenProfileList"
+        ],
+        "inputFields": [],
+        "validationReference": "globalRules",
+        "dataReadFrom": "local",
+        "dataWriteTo": "memory",
+        "cachingPolicy": "session",
+        "offlineBehavior": "full",
+        "connectedServices": [
+          "analytics"
+        ],
+        "navigationLinks": [
+          "ProfileListScreen",
+          "AnalyticsScreen",
+          "DisciplineSelectionScreen"
+        ],
+        "loadingState": "showShimmer",
+        "emptyState": "showCreatePrompt",
+        "errorState": "showErrorDialog",
+        "retryBehavior": "reloadHome"
+      },
+      {
+        "screenName": "DisciplineSelectionScreen",
+        "view": "DisciplineSelectionView",
+        "viewModel": "DraftViewModel",
+        "screenType": "coreFeature",
+        "primaryPurpose": "Select 2–3 sports disciplines",
+        "userActions": [
+          "SelectDiscipline",
+          "Next",
+          "Back"
+        ],
+        "inputFields": [
+          {
+            "fieldName": "selectedDisciplines",
+            "fieldType": "multiSelect",
+            "required": true,
+            "validationGroup": "selectionRules",
+            "defaultValue": "",
+            "storageLocation": "memory"
+          }
+        ],
+        "validationReference": "selectionRules",
+        "dataReadFrom": "static",
+        "dataWriteTo": "memory",
+        "cachingPolicy": "none",
+        "offlineBehavior": "full",
+        "connectedServices": [],
+        "navigationLinks": [
+          "SkillDistributionScreen",
+          "HomeScreen"
+        ],
+        "loadingState": "showProgressBar",
+        "emptyState": "showNoDisciplines",
+        "errorState": "showErrorToast",
+        "retryBehavior": "retrySelection"
+      },
+      {
+        "screenName": "SkillDistributionScreen",
+        "view": "SkillDistributionView",
+        "viewModel": "DraftViewModel",
+        "screenType": "coreFeature",
+        "primaryPurpose": "Distribute skill points",
+        "userActions": [
+          "AdjustSkill",
+          "Next",
+          "Back"
+        ],
+        "inputFields": [
+          {
+            "fieldName": "skillPoints",
+            "fieldType": "numericArray",
+            "required": true,
+            "validationGroup": "numericFieldRules",
+            "defaultValue": "[0,0,0,0,0,0]",
+            "storageLocation": "memory"
+          }
+        ],
+        "validationReference": "numericFieldRules",
+        "dataReadFrom": "memory",
+        "dataWriteTo": "memory",
+        "cachingPolicy": "none",
+        "offlineBehavior": "full",
+        "connectedServices": [],
+        "navigationLinks": [
+          "AccentSelectionScreen",
+          "DisciplineSelectionScreen"
+        ],
+        "loadingState": "showProgressBar",
+        "emptyState": "showNoSkills",
+        "errorState": "showErrorToast",
+        "retryBehavior": "retryDistribution"
+      },
+      {
+        "screenName": "AccentSelectionScreen",
+        "view": "AccentSelectionView",
+        "viewModel": "DraftViewModel",
+        "screenType": "coreFeature",
+        "primaryPurpose": "Set profile accent (offense, defense, custom)",
+        "userActions": [
+          "SelectAccent",
+          "Next",
+          "Back"
+        ],
+        "inputFields": [
+          {
+            "fieldName": "profileAccent",
+            "fieldType": "select",
+            "required": true,
+            "validationGroup": "selectionRules",
+            "defaultValue": "Universal",
+            "storageLocation": "memory"
+          }
+        ],
+        "validationReference": "selectionRules",
+        "dataReadFrom": "memory",
+        "dataWriteTo": "memory",
+        "cachingPolicy": "none",
+        "offlineBehavior": "full",
+        "connectedServices": [],
+        "navigationLinks": [
+          "ProfileEditScreen",
+          "SkillDistributionScreen"
+        ],
+        "loadingState": "showProgressBar",
+        "emptyState": "showNoAccent",
+        "errorState": "showErrorToast",
+        "retryBehavior": "retryAccentSelection"
+      },
+      {
+        "screenName": "ProfileEditScreen",
+        "view": "ProfileEditView",
+        "viewModel": "ProfileViewModel",
+        "screenType": "createEdit",
+        "primaryPurpose": "Create or edit player profile",
+        "userActions": [
+          "SaveProfile",
+          "Cancel"
+        ],
+        "inputFields": [
+          {
+            "fieldName": "profileName",
+            "fieldType": "text",
+            "required": true,
+            "validationGroup": "textFieldRules",
+            "defaultValue": "",
+            "storageLocation": "local"
+          },
+          {
+            "fieldName": "season",
+            "fieldType": "select",
+            "required": true,
+            "validationGroup": "selectionRules",
+            "defaultValue": "Summer Peak",
+            "storageLocation": "local"
+          }
+        ],
+        "validationReference": "formSubmissionPolicy",
+        "dataReadFrom": "memory",
+        "dataWriteTo": "local",
+        "cachingPolicy": "persistent",
+        "offlineBehavior": "full",
+        "connectedServices": [
+          "room"
+        ],
+        "navigationLinks": [
+          "ProfileListScreen",
+          "AccentSelectionScreen"
+        ],
+        "loadingState": "showProgressBar",
+        "emptyState": "showNoProfile",
+        "errorState": "showErrorDialog",
+        "retryBehavior": "retrySaveProfile"
+      },
+      {
+        "screenName": "ProfileListScreen",
+        "view": "ProfileListView",
+        "viewModel": "ProfileViewModel",
+        "screenType": "list",
+        "primaryPurpose": "View and manage saved profiles",
+        "userActions": [
+          "OpenProfile",
+          "Search",
+          "Filter",
+          "Sort"
+        ],
+        "inputFields": [],
+        "validationReference": "globalRules",
+        "dataReadFrom": "local",
+        "dataWriteTo": "memory",
+        "cachingPolicy": "persistent",
+        "offlineBehavior": "full",
+        "connectedServices": [
+          "room"
+        ],
+        "navigationLinks": [
+          "ProfileDetailScreen",
+          "ProfileEditScreen"
+        ],
+        "loadingState": "showShimmer",
+        "emptyState": "showNoProfiles",
+        "errorState": "showErrorDialog",
+        "retryBehavior": "reloadProfiles"
+      },
+      {
+        "screenName": "ProfileDetailScreen",
+        "view": "ProfileDetailView",
+        "viewModel": "ProfileViewModel",
+        "screenType": "detail",
+        "primaryPurpose": "Show detailed analytics for profile",
+        "userActions": [
+          "SimulateMatch",
+          "CompareProfile",
+          "EditProfile"
+        ],
+        "inputFields": [],
+        "validationReference": "globalRules",
+        "dataReadFrom": "local",
+        "dataWriteTo": "memory",
+        "cachingPolicy": "session",
+        "offlineBehavior": "full",
+        "connectedServices": [
+          "room"
+        ],
+        "navigationLinks": [
+          "ComparisonScreen",
+          "ProfileEditScreen",
+          "ProfileListScreen"
+        ],
+        "loadingState": "showShimmer",
+        "emptyState": "showNoProfileDetail",
+        "errorState": "showErrorDialog",
+        "retryBehavior": "reloadProfileDetail"
+      },
+      {
+        "screenName": "ComparisonScreen",
+        "view": "ComparisonView",
+        "viewModel": "AnalyticsViewModel",
+        "screenType": "coreFeature",
+        "primaryPurpose": "Compare two player profiles",
+        "userActions": [
+          "SelectProfiles",
+          "Compare"
+        ],
+        "inputFields": [
+          {
+            "fieldName": "profileA",
+            "fieldType": "select",
+            "required": true,
+            "validationGroup": "selectionRules",
+            "defaultValue": "",
+            "storageLocation": "memory"
+          },
+          {
+            "fieldName": "profileB",
+            "fieldType": "select",
+            "required": true,
+            "validationGroup": "selectionRules",
+            "defaultValue": "",
+            "storageLocation": "memory"
+          }
+        ],
+        "validationReference": "formSubmissionPolicy",
+        "dataReadFrom": "local",
+        "dataWriteTo": "memory",
+        "cachingPolicy": "none",
+        "offlineBehavior": "full",
+        "connectedServices": [
+          "room"
+        ],
+        "navigationLinks": [
+          "ProfileDetailScreen",
+          "AnalyticsScreen"
+        ],
+        "loadingState": "showProgressBar",
+        "emptyState": "showNoComparison",
+        "errorState": "showErrorToast",
+        "retryBehavior": "retryComparison"
+      },
+      {
+        "screenName": "AnalyticsScreen",
+        "view": "AnalyticsView",
+        "viewModel": "AnalyticsViewModel",
+        "screenType": "analytics",
+        "primaryPurpose": "Show aggregate stats and recommendations",
+        "userActions": [
+          "ViewTrends",
+          "GetRecommendations"
+        ],
+        "inputFields": [],
+        "validationReference": "globalRules",
+        "dataReadFrom": "local",
+        "dataWriteTo": "memory",
+        "cachingPolicy": "session",
+        "offlineBehavior": "full",
+        "connectedServices": [
+          "room",
+          "analytics"
+        ],
+        "navigationLinks": [
+          "HomeScreen",
+          "ComparisonScreen"
+        ],
+        "loadingState": "showShimmer",
+        "emptyState": "showNoAnalytics",
+        "errorState": "showErrorDialog",
+        "retryBehavior": "reloadAnalytics"
+      },
+      {
+        "screenName": "SettingsScreen",
+        "view": "SettingsView",
+        "viewModel": "SettingsViewModel",
+        "screenType": "settings",
+        "primaryPurpose": "Manage app preferences and privacy",
+        "userActions": [
+          "ChangeTheme",
+          "RateApp",
+          "ShareApp",
+          "ResetSettings",
+          "ClearLocalData",
+          "ViewPrivacyPolicy"
+        ],
+        "inputFields": [],
+        "validationReference": "globalRules",
+        "dataReadFrom": "local",
+        "dataWriteTo": "local",
+        "cachingPolicy": "persistent",
+        "offlineBehavior": "full",
+        "connectedServices": [],
+        "navigationLinks": [
+          "HomeScreen"
+        ],
+        "loadingState": "showShimmer",
+        "emptyState": "none",
+        "errorState": "showErrorDialog",
+        "retryBehavior": "retrySettings"
+      }
+    ],
+    "services": [
+      {
+        "serviceName": "room",
+        "serviceType": "localDatabase",
+        "persistence": "persistent",
+        "sync": "manual",
+        "encryption": "enabled"
+      },
+      {
+        "serviceName": "datastore",
+        "serviceType": "keyValueStorage",
+        "persistence": "persistent",
+        "sync": "manual",
+        "encryption": "enabled"
+      },
+      {
+        "serviceName": "analytics",
+        "serviceType": "eventTracking",
+        "persistence": "session",
+        "sync": "realtime",
+        "encryption": "disabled"
+      }
+    ],
+    "validation": {
+      "globalRules": {
+        "constraints": "No empty values, valid navigation, consistent state",
+        "errorMessage": "Invalid operation or empty data",
+        "systemBehavior": "Show error dialog and block action"
+      },
+      "textFieldRules": {
+        "constraints": "Non-empty, max 32 chars, no special symbols",
+        "errorMessage": "Name required, max 32 chars, no special symbols",
+        "systemBehavior": "Show inline error and block submission"
+      },
+      "numericFieldRules": {
+        "constraints": "Integer, >=0, <=maxPoints, sum <= totalPoints",
+        "errorMessage": "Points must be within allowed range and not exceed total",
+        "systemBehavior": "Show inline error, reset invalid field"
+      },
+      "dateFieldRules": {
+        "constraints": "Valid date, not future, format yyyy-MM-dd",
+        "errorMessage": "Invalid date format or future date",
+        "systemBehavior": "Show error toast and block submission"
+      },
+      "imageRules": {
+        "constraints": "JPEG/PNG, max 2MB, min 128x128",
+        "errorMessage": "Image must be JPEG/PNG, <2MB, min 128x128px",
+        "systemBehavior": "Show error toast and block upload"
+      },
+      "selectionRules": {
+        "constraints": "At least one, max three, valid option",
+        "errorMessage": "Select 2–3 valid disciplines or accents",
+        "systemBehavior": "Show inline error and block next step"
+      },
+      "errorHandlingStrategy": {
+        "constraints": "All errors logged, user notified, recoverable actions",
+        "errorMessage": "Unexpected error occurred",
+        "systemBehavior": "Show error dialog, log error, offer retry"
+      },
+      "formSubmissionPolicy": {
+        "constraints": "All required fields valid, no pending errors",
+        "errorMessage": "Please correct errors before submitting",
+        "systemBehavior": "Block submission and highlight errors"
+      }
+    },
+    "components": [
+      "ProfileCard",
+      "SkillBar",
+      "DisciplineChip",
+      "AccentSelector",
+      "ProfileComparisonChart",
+      "AnalyticsSummary",
+      "SettingsItem",
+      "Preloader",
+      "OnboardingIllustration"
+    ],
+    "ratingFlow": {
+      "type": "native",
+      "implementation": "In-App Review API",
+      "threshold": 4,
+      "feedbackForm": false,
+      "validationRules": {
+        "constraints": "1–5 stars, one submission per version",
+        "errorMessage": "Please select a rating",
+        "systemBehavior": "Block until rating selected"
+      },
+      "redirectCondition": "If rating >= 4, prompt Play Store review"
+    },
+    "notificationFlows": [
+      {
+        "notificationType": "seasonalUpdate",
+        "title": "Seasonal Profile Update",
+        "body": "It's time to create a new seasonal version of your hybrid athlete!",
+        "triggerCondition": "Season change detected",
+        "frequency": "once per season",
+        "deepLinkDestination": "ProfileEditScreen",
+        "relatedFeature": "ProfileEditScreen"
+      },
+      {
+        "notificationType": "profileComparison",
+        "title": "Compare Your Profiles",
+        "body": "See how your latest build stacks up against previous versions.",
+        "triggerCondition": "New profile created",
+        "frequency": "on event",
+        "deepLinkDestination": "ComparisonScreen",
+        "relatedFeature": "ComparisonScreen"
+      }
+    ]
+  }
+}
