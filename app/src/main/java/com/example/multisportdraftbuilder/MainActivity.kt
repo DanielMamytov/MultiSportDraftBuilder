@@ -29,10 +29,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -128,7 +128,7 @@ fun DraftBuilderApp() {
                         MainTab.HOME to Icons.Default.Home,
                         MainTab.PROFILES to Icons.Default.Person,
                         MainTab.DRAFT to Icons.Default.Build,
-                        MainTab.ANALYTICS to Icons.Default.Analytics,
+                        MainTab.ANALYTICS to Icons.Default.Search,
                         MainTab.SETTINGS to Icons.Default.Settings
                     ).forEach { (tab, icon) ->
                         NavigationBarItem(
