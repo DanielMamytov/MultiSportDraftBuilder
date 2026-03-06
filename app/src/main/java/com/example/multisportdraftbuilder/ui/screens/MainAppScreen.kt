@@ -1,4 +1,4 @@
-package com.example.multisportdraftbuilder.ui
+package com.example.multisportdraftbuilder.ui.screens
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Canvas
@@ -20,10 +20,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -81,7 +81,7 @@ private fun AppContent(uiState: MainUiState, viewModel: MainViewModel) {
                     MainTab.HOME to Icons.Default.Home,
                     MainTab.PROFILES to Icons.Default.Person,
                     MainTab.DRAFT to Icons.Default.Build,
-                    MainTab.ANALYTICS to Icons.Default.Analytics,
+                    MainTab.ANALYTICS to Icons.Default.Search,
                     MainTab.SETTINGS to Icons.Default.Settings
                 ).forEach { (tab, icon) ->
                     NavigationBarItem(
