@@ -1,5 +1,8 @@
 package com.example.multisportdraftbuilder.ui
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
