@@ -13,6 +13,7 @@ class SettingsStore(private val context: Context) {
 
     private val darkThemeKey = booleanPreferencesKey("dark_theme")
     private val notificationsKey = booleanPreferencesKey("notifications_enabled")
+    private val onboardingCompletedKey = booleanPreferencesKey("onboarding_completed")
 
     val darkThemeEnabled: Flow<Boolean> = context.dataStore.data.map { preferences ->
         preferences[darkThemeKey] ?: true
@@ -22,11 +23,19 @@ class SettingsStore(private val context: Context) {
         preferences[notificationsKey] ?: true
     }
 
+    val onboardingCompleted: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[onboardingCompletedKey] ?: false
+    }
+
     suspend fun setDarkTheme(enabled: Boolean) {
         context.dataStore.edit { preferences -> preferences[darkThemeKey] = enabled }
     }
 
     suspend fun setNotifications(enabled: Boolean) {
         context.dataStore.edit { preferences -> preferences[notificationsKey] = enabled }
+    }
+
+    suspend fun setOnboardingCompleted(completed: Boolean) {
+        context.dataStore.edit { preferences -> preferences[onboardingCompletedKey] = completed }
     }
 }
