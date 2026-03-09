@@ -2,9 +2,12 @@ package com.example.multisportdraftbuilder.ui.activity
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import com.example.multisportdraftbuilder.AppModules
 import com.example.multisportdraftbuilder.ui.MainAppScreen
 import com.example.multisportdraftbuilder.ui.theme.MultiSportDraftBuilderTheme
@@ -22,7 +25,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(Color(0xFF181828).toArgb()),
+            navigationBarStyle = SystemBarStyle.dark(Color(0xFF181828).toArgb())
+        )
         setContent {
             MultiSportDraftBuilderTheme {
                 MainAppScreen(viewModel = viewModel)
