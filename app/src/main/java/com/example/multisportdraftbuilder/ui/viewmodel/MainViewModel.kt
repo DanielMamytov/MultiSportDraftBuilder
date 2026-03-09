@@ -196,7 +196,7 @@ data class MainUiState(
         "Tactics" to 20,
         "Ball Control" to 20
     ),
-    val totalPoints: Int = 120,
+    val totalPoints: Int = 360,
     val searchQuery: String = "",
     val seasonFilter: String = "All",
     val darkThemeEnabled: Boolean = true,
