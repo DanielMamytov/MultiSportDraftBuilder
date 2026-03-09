@@ -36,6 +36,11 @@ class SettingsStore(private val context: Context) {
         context.dataStore.edit { preferences -> preferences[notificationsKey] = enabled }
     }
 
+    suspend fun resetSettings() {
+        context.dataStore.edit { preferences ->
+            preferences.remove(darkThemeKey)
+            preferences.remove(notificationsKey)
+        }
     suspend fun reset() {
         context.dataStore.edit { emptyPreferences() }
     suspend fun setOnboardingCompleted(completed: Boolean) {

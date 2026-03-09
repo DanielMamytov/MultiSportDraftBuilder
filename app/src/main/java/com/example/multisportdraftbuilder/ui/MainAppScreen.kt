@@ -402,7 +402,7 @@ private fun SettingsScreen(
         Card(colors = CardDefaults.cardColors(containerColor = themedCardColor())) {
             Column(Modifier.padding(12.dp)) {
                 TextButton(onClick = viewModel::clearLocalData) { Text("Clear local data") }
-                TextButton(onClick = {}) { Text("Reset settings") }
+                TextButton(onClick = viewModel::resetSettings) { Text("Reset settings") }
                 TextButton(onClick = {}) { Text("Rate app") }
                 TextButton(onClick = {}) { Text("Share app") }
                 Text("Version 1.0", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
