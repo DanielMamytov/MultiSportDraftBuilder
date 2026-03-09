@@ -1,5 +1,8 @@
 package com.example.multisportdraftbuilder.ui
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -33,6 +36,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
@@ -47,36 +51,52 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
 import com.example.multisportdraftbuilder.data.model.ProfileDraft
 import com.example.multisportdraftbuilder.ui.navigation.AppPhase
 import com.example.multisportdraftbuilder.ui.navigation.MainTab
+import com.example.multisportdraftbuilder.ui.theme.BackgroundDark
 import com.example.multisportdraftbuilder.ui.theme.CardDark
+import com.example.multisportdraftbuilder.ui.theme.CardLight
 import com.example.multisportdraftbuilder.ui.viewmodel.MainUiState
 import com.example.multisportdraftbuilder.ui.viewmodel.MainViewModel
 import com.example.multisportdraftbuilder.utils.ProfileValidators
 
 @Composable
-fun MainAppScreen(viewModel: MainViewModel) {
+fun MainAppScreen(
+    viewModel: MainViewModel,
+    notificationsPermissionGranted: Boolean,
+    onRequestNotificationPermission: () -> Unit
+) {
     val uiState by viewModel.uiState.collectAsState()
 
     when (uiState.phase) {
         AppPhase.PRELOADER -> PreloaderScreen(uiState.preloadProgress)
         AppPhase.ONBOARDING -> OnboardingScreen(uiState.onboardingPage, viewModel::nextOnboarding, viewModel::previousOnboarding)
-        AppPhase.APP -> AppContent(uiState, viewModel)
+        AppPhase.APP -> AppContent(uiState, viewModel, notificationsPermissionGranted, onRequestNotificationPermission)
     }
 }
 
 @Composable
-private fun AppContent(uiState: MainUiState, viewModel: MainViewModel) {
+private fun AppContent(
+    uiState: MainUiState,
+    viewModel: MainViewModel,
+    notificationsPermissionGranted: Boolean,
+    onRequestNotificationPermission: () -> Unit
+) {
     Scaffold(
-        containerColor = Color(0xFF181828),
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            NavigationBar(containerColor = Color(0xFF23233A)) {
+            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                 listOf(
                     MainTab.HOME to Icons.Default.Home,
                     MainTab.PROFILES to Icons.Default.Person,
@@ -100,7 +120,12 @@ private fun AppContent(uiState: MainUiState, viewModel: MainViewModel) {
                 MainTab.PROFILES -> ProfilesScreen(uiState, viewModel)
                 MainTab.DRAFT -> DraftScreen(uiState, viewModel)
                 MainTab.ANALYTICS -> AnalyticsScreen(uiState.profiles)
-                MainTab.SETTINGS -> SettingsScreen(uiState, viewModel)
+                MainTab.SETTINGS -> SettingsScreen(
+                    uiState = uiState,
+                    viewModel = viewModel,
+                    notificationsPermissionGranted = notificationsPermissionGranted,
+                    onRequestNotificationPermission = onRequestNotificationPermission
+                )
             }
         }
     }
@@ -109,13 +134,13 @@ private fun AppContent(uiState: MainUiState, viewModel: MainViewModel) {
 @Composable
 private fun PreloaderScreen(progress: Float) {
     Column(
-        modifier = Modifier.fillMaxSize().background(Color(0xFF181828)).padding(24.dp),
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         CircularProgressIndicator(progress = { progress }, color = Color(0xFFA259FF))
         Spacer(Modifier.height(16.dp))
-        Text("Initializing theme, local storage and dependencies", color = Color.White)
+        Text("Initializing theme, local storage and dependencies", color = MaterialTheme.colorScheme.onBackground)
         Spacer(Modifier.height(8.dp))
         LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
     }
@@ -130,14 +155,14 @@ private fun OnboardingScreen(page: Int, onNext: () -> Unit, onBack: () -> Unit) 
     )
 
     Column(
-        modifier = Modifier.fillMaxSize().background(Color(0xFF181828)).padding(24.dp),
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(24.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Column {
-            Text("MultiSport Draft Builder", color = Color.White, fontWeight = FontWeight.Bold)
+            Text("MultiSport Draft Builder", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(12.dp))
             AnimatedContent(page, label = "onboarding") { index ->
-                Card(colors = CardDefaults.cardColors(containerColor = CardDark)) {
+                Card(colors = CardDefaults.cardColors(containerColor = themedCardColor())) {
                     Column(Modifier.padding(16.dp)) {
                         Text("Step ${index + 1} / 3", color = Color(0xFFC7BFFF))
                         Spacer(Modifier.height(8.dp))
@@ -290,7 +315,7 @@ private fun ProfilesScreen(uiState: MainUiState, viewModel: MainViewModel) {
 @Composable
 private fun ProfileCard(profile: ProfileDraft) {
     val index = profile.skills.values.average().toInt()
-    Card(colors = CardDefaults.cardColors(containerColor = CardDark), shape = RoundedCornerShape(16.dp)) {
+    Card(colors = CardDefaults.cardColors(containerColor = themedCardColor()), shape = RoundedCornerShape(16.dp)) {
         Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(profile.name, color = Color.White, fontWeight = FontWeight.SemiBold)
@@ -315,7 +340,7 @@ private fun AnalyticsScreen(profiles: List<ProfileDraft>) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text("Analytics", color = Color.White, fontWeight = FontWeight.Bold)
-        Card(colors = CardDefaults.cardColors(containerColor = CardDark)) {
+        Card(colors = CardDefaults.cardColors(containerColor = themedCardColor())) {
             Column(Modifier.padding(12.dp)) {
                 Text("Average skills", color = Color.White)
                 skillAverages.forEach { Text("${it.key}: ${it.value}", color = Color(0xFFC7BFFF)) }
@@ -325,7 +350,7 @@ private fun AnalyticsScreen(profiles: List<ProfileDraft>) {
             val left = profiles[0]
             val right = profiles[1]
             val probability = simulationProbability(left, right)
-            Card(colors = CardDefaults.cardColors(containerColor = CardDark)) {
+            Card(colors = CardDefaults.cardColors(containerColor = themedCardColor())) {
                 Column(Modifier.padding(12.dp)) {
                     Text("Simulation: ${left.name} vs ${right.name}", color = Color.White)
                     Text("Success chance for first profile: $probability%", color = Color(0xFFA259FF))
@@ -350,37 +375,87 @@ private fun simulationProbability(left: ProfileDraft, right: ProfileDraft): Int 
 }
 
 @Composable
-private fun SettingsScreen(uiState: MainUiState, viewModel: MainViewModel) {
+private fun SettingsScreen(
+    uiState: MainUiState,
+    viewModel: MainViewModel,
+    notificationsPermissionGranted: Boolean,
+    onRequestNotificationPermission: () -> Unit
+) {
     Column(
-        Modifier.fillMaxSize().background(Color(0xFF181828)).padding(16.dp),
+        Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Text("Settings", color = Color.White, fontWeight = FontWeight.Bold)
+        Text("Settings", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
         SettingSwitch("Dark theme", uiState.darkThemeEnabled, viewModel::setDarkTheme)
-        SettingSwitch("Seasonal notifications", uiState.notificationsEnabled, viewModel::setNotifications)
+        SettingSwitch(
+            title = "Seasonal notifications",
+            checked = uiState.notificationsEnabled && notificationsPermissionGranted,
+            onChanged = { enabled ->
+                if (enabled && !notificationsPermissionGranted) {
+                    onRequestNotificationPermission()
+                } else {
+                    viewModel.setNotifications(enabled)
+                }
+            }
+        )
 
-        Card(colors = CardDefaults.cardColors(containerColor = CardDark)) {
+        Card(colors = CardDefaults.cardColors(containerColor = themedCardColor())) {
             Column(Modifier.padding(12.dp)) {
                 TextButton(onClick = viewModel::clearLocalData) { Text("Clear local data") }
                 TextButton(onClick = viewModel::resetSettings) { Text("Reset settings") }
                 TextButton(onClick = {}) { Text("Rate app") }
                 TextButton(onClick = {}) { Text("Share app") }
-                Text("Version 1.0", color = Color(0xFFC7BFFF))
+                Text("Version 1.0", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
             }
         }
     }
 }
 
+private fun openAppRating(context: android.content.Context) {
+    val packageName = context.packageName
+    val marketIntent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName"))
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+    runCatching {
+        context.startActivity(marketIntent)
+    }.onFailure {
+        val playStoreIntent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
+        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+        try {
+            context.startActivity(playStoreIntent)
+        } catch (_: ActivityNotFoundException) {
+            Toast.makeText(context, "No app store found", Toast.LENGTH_SHORT).show()
+        }
+    }
+}
+
+private fun shareApp(context: android.content.Context) {
+    val packageName = context.packageName
+    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_TEXT, "Check out MultiSport Draft Builder: https://play.google.com/store/apps/details?id=$packageName")
+    }
+
+    context.startActivity(Intent.createChooser(shareIntent, "Share app"))
+}
+
 @Composable
 private fun SettingSwitch(title: String, checked: Boolean, onChanged: (Boolean) -> Unit) {
-    Card(colors = CardDefaults.cardColors(containerColor = CardDark), shape = RoundedCornerShape(16.dp)) {
+    Card(colors = CardDefaults.cardColors(containerColor = themedCardColor()), shape = RoundedCornerShape(16.dp)) {
         Row(
             Modifier.fillMaxWidth().padding(12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(title, color = Color.White)
+            Text(title, color = MaterialTheme.colorScheme.onSurface)
             Switch(checked = checked, onCheckedChange = onChanged)
         }
     }
 }
+
+@Composable
+private fun themedCardColor(): Color =
+    if (MaterialTheme.colorScheme.background == BackgroundDark) CardDark else CardLight

@@ -36,12 +36,18 @@ class MainViewModel(
             combine(
                 repository.observeProfiles(),
                 settingsStore.darkThemeEnabled,
-                settingsStore.notificationsEnabled
-            ) { profiles, darkTheme, notifications ->
-                Triple(profiles, darkTheme, notifications)
-            }.collect { (profiles, darkTheme, notifications) ->
+                settingsStore.notificationsEnabled,
+                settingsStore.onboardingCompleted
+            ) { profiles, darkTheme, notifications, onboardingCompleted ->
+                Quadruple(profiles, darkTheme, notifications, onboardingCompleted)
+            }.collect { (profiles, darkTheme, notifications, onboardingCompleted) ->
                 _uiState.update {
-                    it.copy(profiles = profiles, darkThemeEnabled = darkTheme, notificationsEnabled = notifications)
+                    it.copy(
+                        profiles = profiles,
+                        darkThemeEnabled = darkTheme,
+                        notificationsEnabled = notifications,
+                        onboardingCompleted = onboardingCompleted
+                    )
                 }
             }
         }
@@ -53,14 +59,20 @@ class MainViewModel(
                 delay(150)
                 _uiState.update { state -> state.copy(preloadProgress = (state.preloadProgress + 0.1f).coerceAtMost(1f)) }
             }
-            _uiState.update { it.copy(phase = AppPhase.ONBOARDING) }
+            _uiState.update { state ->
+                state.copy(phase = if (state.onboardingCompleted) AppPhase.APP else AppPhase.ONBOARDING)
+            }
         }
     }
 
     fun nextOnboarding() {
-        _uiState.update {
-            if (it.onboardingPage >= 2) it.copy(phase = AppPhase.APP)
-            else it.copy(onboardingPage = it.onboardingPage + 1)
+        _uiState.update { state ->
+            if (state.onboardingPage >= 2) {
+                viewModelScope.launch { settingsStore.setOnboardingCompleted(true) }
+                state.copy(phase = AppPhase.APP, onboardingCompleted = true)
+            } else {
+                state.copy(onboardingPage = state.onboardingPage + 1)
+            }
         }
     }
 
@@ -156,7 +168,9 @@ class MainViewModel(
     }
 
     fun resetSettings() {
-        viewModelScope.launch { settingsStore.resetSettings() }
+        viewModelScope.launch {
+            settingsStore.reset()
+        }
     }
 }
 
@@ -192,5 +206,13 @@ data class MainUiState(
     val searchQuery: String = "",
     val seasonFilter: String = "All",
     val darkThemeEnabled: Boolean = true,
-    val notificationsEnabled: Boolean = true
+    val notificationsEnabled: Boolean = true,
+    val onboardingCompleted: Boolean = false
+)
+
+private data class Quadruple<A, B, C, D>(
+    val first: A,
+    val second: B,
+    val third: C,
+    val fourth: D
 )
