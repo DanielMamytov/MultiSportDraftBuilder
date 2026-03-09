@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.example.multisportdraftbuilder.AppModules
 import com.example.multisportdraftbuilder.ui.MainAppScreen
 import com.example.multisportdraftbuilder.ui.theme.MultiSportDraftBuilderTheme
@@ -24,7 +26,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MultiSportDraftBuilderTheme {
+            val uiState by viewModel.uiState.collectAsState()
+            MultiSportDraftBuilderTheme(darkTheme = uiState.darkThemeEnabled) {
                 MainAppScreen(viewModel = viewModel)
             }
         }
