@@ -8,12 +8,11 @@ import com.example.multisportdraftbuilder.data.repository.SportsNetworkClient
 
 object AppModules {
 
-    private val localProfileStorage by lazy { LocalProfileStorage() }
     private val networkClient by lazy { SportsNetworkClient() }
 
     fun provideProfileRepository(context: Context): ProfileRepository {
-        context.applicationContext
-        return ProfileRepository(localProfileStorage, networkClient)
+        val appContext = context.applicationContext
+        return ProfileRepository(LocalProfileStorage(appContext), networkClient)
     }
 
     fun provideSettingsStore(context: Context): SettingsStore {
