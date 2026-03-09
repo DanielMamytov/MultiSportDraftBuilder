@@ -6,6 +6,8 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.example.multisportdraftbuilder.AppModules
@@ -30,7 +32,8 @@ class MainActivity : ComponentActivity() {
             navigationBarStyle = SystemBarStyle.dark(Color(0xFF181828).toArgb())
         )
         setContent {
-            MultiSportDraftBuilderTheme {
+            val uiState by viewModel.uiState.collectAsState()
+            MultiSportDraftBuilderTheme(darkTheme = uiState.darkThemeEnabled) {
                 MainAppScreen(viewModel = viewModel)
             }
         }
