@@ -1,5 +1,8 @@
 package com.example.multisportdraftbuilder.ui
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -47,6 +50,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -351,6 +355,8 @@ private fun simulationProbability(left: ProfileDraft, right: ProfileDraft): Int 
 
 @Composable
 private fun SettingsScreen(uiState: MainUiState, viewModel: MainViewModel) {
+    val context = LocalContext.current
+
     Column(
         Modifier.fillMaxSize().background(Color(0xFF181828)).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -364,11 +370,28 @@ private fun SettingsScreen(uiState: MainUiState, viewModel: MainViewModel) {
                 TextButton(onClick = viewModel::clearLocalData) { Text("Clear local data") }
                 TextButton(onClick = {}) { Text("Reset settings") }
                 TextButton(onClick = {}) { Text("Rate app") }
-                TextButton(onClick = {}) { Text("Share app") }
+                TextButton(onClick = { shareApp(context) }) { Text("Share app") }
                 Text("Version 1.0", color = Color(0xFFC7BFFF))
             }
         }
     }
+}
+
+private fun shareApp(context: Context) {
+    val sendIntent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_SUBJECT, "MultiSport Draft Builder")
+        putExtra(
+            Intent.EXTRA_TEXT,
+            "Try MultiSport Draft Builder for lineup planning and comparisons!"
+        )
+    }
+
+    val chooser = Intent.createChooser(sendIntent, "Share app")
+    if (context !is Activity) {
+        chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    context.startActivity(chooser)
 }
 
 @Composable
