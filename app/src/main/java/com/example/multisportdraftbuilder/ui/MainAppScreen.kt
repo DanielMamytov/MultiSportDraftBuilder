@@ -61,18 +61,27 @@ import com.example.multisportdraftbuilder.ui.viewmodel.MainViewModel
 import com.example.multisportdraftbuilder.utils.ProfileValidators
 
 @Composable
-fun MainAppScreen(viewModel: MainViewModel) {
+fun MainAppScreen(
+    viewModel: MainViewModel,
+    notificationsPermissionGranted: Boolean,
+    onRequestNotificationPermission: () -> Unit
+) {
     val uiState by viewModel.uiState.collectAsState()
 
     when (uiState.phase) {
         AppPhase.PRELOADER -> PreloaderScreen(uiState.preloadProgress)
         AppPhase.ONBOARDING -> OnboardingScreen(uiState.onboardingPage, viewModel::nextOnboarding, viewModel::previousOnboarding)
-        AppPhase.APP -> AppContent(uiState, viewModel)
+        AppPhase.APP -> AppContent(uiState, viewModel, notificationsPermissionGranted, onRequestNotificationPermission)
     }
 }
 
 @Composable
-private fun AppContent(uiState: MainUiState, viewModel: MainViewModel) {
+private fun AppContent(
+    uiState: MainUiState,
+    viewModel: MainViewModel,
+    notificationsPermissionGranted: Boolean,
+    onRequestNotificationPermission: () -> Unit
+) {
     Scaffold(
         containerColor = Color(0xFF181828),
         bottomBar = {
@@ -100,7 +109,12 @@ private fun AppContent(uiState: MainUiState, viewModel: MainViewModel) {
                 MainTab.PROFILES -> ProfilesScreen(uiState, viewModel)
                 MainTab.DRAFT -> DraftScreen(uiState, viewModel)
                 MainTab.ANALYTICS -> AnalyticsScreen(uiState.profiles)
-                MainTab.SETTINGS -> SettingsScreen(uiState, viewModel)
+                MainTab.SETTINGS -> SettingsScreen(
+                    uiState = uiState,
+                    viewModel = viewModel,
+                    notificationsPermissionGranted = notificationsPermissionGranted,
+                    onRequestNotificationPermission = onRequestNotificationPermission
+                )
             }
         }
     }
@@ -350,14 +364,29 @@ private fun simulationProbability(left: ProfileDraft, right: ProfileDraft): Int 
 }
 
 @Composable
-private fun SettingsScreen(uiState: MainUiState, viewModel: MainViewModel) {
+private fun SettingsScreen(
+    uiState: MainUiState,
+    viewModel: MainViewModel,
+    notificationsPermissionGranted: Boolean,
+    onRequestNotificationPermission: () -> Unit
+) {
     Column(
         Modifier.fillMaxSize().background(Color(0xFF181828)).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Text("Settings", color = Color.White, fontWeight = FontWeight.Bold)
         SettingSwitch("Dark theme", uiState.darkThemeEnabled, viewModel::setDarkTheme)
-        SettingSwitch("Seasonal notifications", uiState.notificationsEnabled, viewModel::setNotifications)
+        SettingSwitch(
+            title = "Seasonal notifications",
+            checked = uiState.notificationsEnabled && notificationsPermissionGranted,
+            onChanged = { enabled ->
+                if (enabled && !notificationsPermissionGranted) {
+                    onRequestNotificationPermission()
+                } else {
+                    viewModel.setNotifications(enabled)
+                }
+            }
+        )
 
         Card(colors = CardDefaults.cardColors(containerColor = CardDark)) {
             Column(Modifier.padding(12.dp)) {
