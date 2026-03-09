@@ -48,11 +48,16 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
 import com.example.multisportdraftbuilder.data.model.ProfileDraft
 import com.example.multisportdraftbuilder.ui.navigation.AppPhase
 import com.example.multisportdraftbuilder.ui.navigation.MainTab
@@ -401,6 +406,37 @@ private fun SettingsScreen(
             }
         }
     }
+}
+
+private fun openAppRating(context: android.content.Context) {
+    val packageName = context.packageName
+    val marketIntent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName"))
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+    runCatching {
+        context.startActivity(marketIntent)
+    }.onFailure {
+        val playStoreIntent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
+        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+        try {
+            context.startActivity(playStoreIntent)
+        } catch (_: ActivityNotFoundException) {
+            Toast.makeText(context, "No app store found", Toast.LENGTH_SHORT).show()
+        }
+    }
+}
+
+private fun shareApp(context: android.content.Context) {
+    val packageName = context.packageName
+    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_TEXT, "Check out MultiSport Draft Builder: https://play.google.com/store/apps/details?id=$packageName")
+    }
+
+    context.startActivity(Intent.createChooser(shareIntent, "Share app"))
 }
 
 @Composable

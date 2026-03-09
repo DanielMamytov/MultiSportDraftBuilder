@@ -166,6 +166,12 @@ class MainViewModel(
     fun clearLocalData() {
         repository.clearProfiles()
     }
+
+    fun resetSettings() {
+        viewModelScope.launch {
+            settingsStore.reset()
+        }
+    }
 }
 
 class MainViewModelFactory(
