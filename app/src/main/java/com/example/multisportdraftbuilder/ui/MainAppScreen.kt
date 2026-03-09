@@ -1,8 +1,9 @@
 package com.example.multisportdraftbuilder.ui
 
-import android.app.Activity
-import android.content.Context
+import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -51,16 +52,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import android.content.ActivityNotFoundException
-import android.content.Intent
-import android.net.Uri
-import android.widget.Toast
 import com.example.multisportdraftbuilder.data.model.ProfileDraft
 import com.example.multisportdraftbuilder.ui.navigation.AppPhase
 import com.example.multisportdraftbuilder.ui.navigation.MainTab
@@ -381,6 +378,8 @@ private fun SettingsScreen(
     notificationsPermissionGranted: Boolean,
     onRequestNotificationPermission: () -> Unit
 ) {
+    val context = LocalContext.current
+
     Column(
         Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -399,12 +398,23 @@ private fun SettingsScreen(
             }
         )
 
-        Card(colors = CardDefaults.cardColors(containerColor = themedCardColor())) {
-            Column(Modifier.padding(12.dp)) {
-                TextButton(onClick = viewModel::clearLocalData) { Text("Clear local data") }
-                TextButton(onClick = viewModel::resetSettings) { Text("Reset settings") }
-                TextButton(onClick = {}) { Text("Rate app") }
-                TextButton(onClick = {}) { Text("Share app") }
+        Card(
+            colors = CardDefaults.cardColors(containerColor = themedCardColor()),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(Modifier.fillMaxWidth().padding(12.dp)) {
+                TextButton(onClick = viewModel::clearLocalData, modifier = Modifier.fillMaxWidth()) {
+                    Text("Clear local data")
+                }
+                TextButton(onClick = viewModel::resetSettings, modifier = Modifier.fillMaxWidth()) {
+                    Text("Reset settings")
+                }
+                TextButton(onClick = { openAppRating(context) }, modifier = Modifier.fillMaxWidth()) {
+                    Text("Rate app")
+                }
+                TextButton(onClick = { shareApp(context) }, modifier = Modifier.fillMaxWidth()) {
+                    Text("Share app")
+                }
                 Text("Version 1.0", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
             }
         }
