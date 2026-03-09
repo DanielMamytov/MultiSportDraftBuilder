@@ -2,7 +2,6 @@ package com.example.multisportdraftbuilder.data.local
 
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -43,7 +42,9 @@ class SettingsStore(private val context: Context) {
         }
     }
     suspend fun reset() {
-        context.dataStore.edit { emptyPreferences() }
+        context.dataStore.edit { preferences ->
+            preferences.clear()
+        }
     }
     suspend fun setOnboardingCompleted(completed: Boolean) {
         context.dataStore.edit { preferences -> preferences[onboardingCompletedKey] = completed }
