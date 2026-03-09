@@ -1,4 +1,4 @@
-package com.example.multisportdraftbuilder.ui.screens
+package com.example.multisportdraftbuilder.ui
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Canvas

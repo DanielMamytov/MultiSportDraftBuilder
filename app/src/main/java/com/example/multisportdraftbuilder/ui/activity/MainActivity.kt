@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import com.example.multisportdraftbuilder.AppModules
-import com.example.multisportdraftbuilder.ui.screens.MainAppScreen
+import com.example.multisportdraftbuilder.ui.MainAppScreen
 import com.example.multisportdraftbuilder.ui.theme.MultiSportDraftBuilderTheme
 import com.example.multisportdraftbuilder.ui.viewmodel.MainViewModel
 import com.example.multisportdraftbuilder.ui.viewmodel.MainViewModelFactory
