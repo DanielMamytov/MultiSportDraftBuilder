@@ -476,7 +476,6 @@ private fun SettingsScreen(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Text("Settings", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
-        SettingSwitch("Dark theme", uiState.darkThemeEnabled, viewModel::setDarkTheme)
         SettingSwitch(
             title = "Seasonal notifications",
             checked = uiState.notificationsEnabled && notificationsPermissionGranted,

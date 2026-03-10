@@ -10,7 +10,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -36,7 +35,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            val uiState by viewModel.uiState.collectAsState()
             val launcher = rememberLauncherForActivityResult(
                 ActivityResultContracts.RequestPermission()
             ) { isGranted ->
@@ -46,7 +44,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            MultiSportDraftBuilderTheme(darkTheme = uiState.darkThemeEnabled) {
+            MultiSportDraftBuilderTheme {
                 MainAppScreen(
                     viewModel = viewModel,
                     notificationsPermissionGranted = notificationsPermissionGranted,
