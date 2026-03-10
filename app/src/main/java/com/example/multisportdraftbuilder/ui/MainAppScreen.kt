@@ -52,6 +52,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -331,36 +334,124 @@ private fun AnalyticsScreen(profiles: List<ProfileDraft>) {
     val skillAverages = profiles.flatMap { it.skills.entries }
         .groupBy { it.key }
         .mapValues { (_, entries) -> entries.map { it.value }.average().toInt() }
+    val availableSkills = profiles.firstOrNull()?.skills?.keys?.toList().orEmpty()
+
+    var leftProfileId by remember(profiles) { mutableStateOf(profiles.firstOrNull()?.id) }
+    var rightProfileId by remember(profiles) {
+        mutableStateOf(profiles.getOrNull(1)?.id ?: profiles.firstOrNull()?.id)
+    }
+
+    if (leftProfileId != null && profiles.none { it.id == leftProfileId }) {
+        leftProfileId = profiles.firstOrNull()?.id
+    }
+    if (rightProfileId != null && profiles.none { it.id == rightProfileId }) {
+        rightProfileId = profiles.getOrNull(1)?.id ?: profiles.firstOrNull()?.id
+    }
+
+    if (leftProfileId == rightProfileId && profiles.size > 1) {
+        rightProfileId = profiles.firstOrNull { it.id != leftProfileId }?.id
+    }
+
+    val left = profiles.firstOrNull { it.id == leftProfileId }
+    val right = profiles.firstOrNull { it.id == rightProfileId }
+    val probability = if (left != null && right != null) simulationProbability(left, right) else null
 
     Column(
         Modifier.fillMaxSize().background(Color(0xFF181828)).padding(16.dp).verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text("Analytics", color = Color.White, fontWeight = FontWeight.Bold)
+        Text(
+            "Сравнивайте любые две сборки и находите ключевые различия по навыкам.",
+            color = Color(0xFFC7BFFF)
+        )
+
         Card(colors = CardDefaults.cardColors(containerColor = themedCardColor())) {
-            Column(Modifier.padding(12.dp)) {
-                Text("Average skills", color = Color.White)
-                skillAverages.forEach { Text("${it.key}: ${it.value}", color = Color(0xFFC7BFFF)) }
-            }
-        }
-        if (profiles.size >= 2) {
-            val left = profiles[0]
-            val right = profiles[1]
-            val probability = simulationProbability(left, right)
-            Card(colors = CardDefaults.cardColors(containerColor = themedCardColor())) {
-                Column(Modifier.padding(12.dp)) {
-                    Text("Simulation: ${left.name} vs ${right.name}", color = Color.White)
-                    Text("Success chance for first profile: $probability%", color = Color(0xFFA259FF))
-                    left.skills.keys.forEach { skill ->
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(skill, color = Color.White, modifier = Modifier.width(90.dp))
-                            Canvas(Modifier.width((left.skills[skill] ?: 0).dp).height(8.dp)) { drawRect(Color(0xFFA259FF)) }
-                            Spacer(Modifier.width(6.dp))
-                            Canvas(Modifier.width((right.skills[skill] ?: 0).dp).height(8.dp)) { drawRect(Color(0xFF7F7FFF)) }
+            Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Average skills", color = Color.White, fontWeight = FontWeight.SemiBold)
+                skillAverages.forEach { (skill, value) ->
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text(skill, color = Color(0xFFC7BFFF))
+                            Text("$value", color = Color.White, fontWeight = FontWeight.SemiBold)
                         }
+                        LinearProgressIndicator(
+                            progress = { value / 100f },
+                            modifier = Modifier.fillMaxWidth(),
+                            color = Color(0xFFA259FF),
+                            trackColor = Color(0xFF373758)
+                        )
                     }
                 }
             }
+        }
+
+        if (profiles.isNotEmpty()) {
+            Card(colors = CardDefaults.cardColors(containerColor = themedCardColor())) {
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("Экран сравнения профилей", color = Color.White, fontWeight = FontWeight.SemiBold)
+                    Text("Выберите две сборки для детального анализа", color = Color(0xFFC7BFFF))
+
+                    Text("Профиль 1", color = Color(0xFFA259FF), fontWeight = FontWeight.SemiBold)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        profiles.forEach { profile ->
+                            FilterChip(
+                                selected = leftProfileId == profile.id,
+                                onClick = { leftProfileId = profile.id },
+                                label = { Text(profile.name) }
+                            )
+                        }
+                    }
+
+                    Text("Профиль 2", color = Color(0xFF7F7FFF), fontWeight = FontWeight.SemiBold)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        profiles.forEach { profile ->
+                            FilterChip(
+                                selected = rightProfileId == profile.id,
+                                onClick = { rightProfileId = profile.id },
+                                enabled = leftProfileId != profile.id || profiles.size == 1,
+                                label = { Text(profile.name) }
+                            )
+                        }
+                    }
+
+                    if (left != null && right != null && probability != null) {
+                        Divider(color = Color(0xFF373758))
+                        Text("Simulation: ${left.name} vs ${right.name}", color = Color.White)
+                        Text("Success chance for first profile: $probability%", color = Color(0xFFA259FF))
+
+                        availableSkills.forEach { skill ->
+                            SkillComparisonRow(
+                                skill = skill,
+                                leftValue = left.skills[skill] ?: 0,
+                                rightValue = right.skills[skill] ?: 0
+                            )
+                        }
+                    } else {
+                        Text("Выберите две разные сборки для сравнения.", color = Color(0xFFC7BFFF))
+                    }
+                }
+            }
+        } else {
+            Text("Нет сохранённых сборок. Создайте их во вкладке Draft.", color = Color(0xFFC7BFFF))
+        }
+    }
+}
+
+@Composable
+private fun SkillComparisonRow(skill: String, leftValue: Int, rightValue: Int) {
+    val leftColor = if (leftValue >= rightValue) Color(0xFFBB86FC) else Color(0xFF8A8AA6)
+    val rightColor = if (rightValue > leftValue) Color(0xFF7F7FFF) else Color(0xFF8A8AA6)
+
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(skill, color = Color.White)
+            Text("$leftValue : $rightValue", color = Color(0xFFC7BFFF))
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Canvas(Modifier.width(leftValue.dp).height(9.dp)) { drawRect(leftColor) }
+            Spacer(Modifier.width(6.dp))
+            Canvas(Modifier.width(rightValue.dp).height(9.dp)) { drawRect(rightColor) }
         }
     }
 }
