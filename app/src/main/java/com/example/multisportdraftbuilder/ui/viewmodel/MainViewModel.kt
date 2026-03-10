@@ -35,16 +35,14 @@ class MainViewModel(
         viewModelScope.launch {
             combine(
                 repository.observeProfiles(),
-                settingsStore.darkThemeEnabled,
                 settingsStore.notificationsEnabled,
                 settingsStore.onboardingCompleted
-            ) { profiles, darkTheme, notifications, onboardingCompleted ->
-                Quadruple(profiles, darkTheme, notifications, onboardingCompleted)
-            }.collect { (profiles, darkTheme, notifications, onboardingCompleted) ->
+            ) { profiles, notifications, onboardingCompleted ->
+                Triple(profiles, notifications, onboardingCompleted)
+            }.collect { (profiles, notifications, onboardingCompleted) ->
                 _uiState.update {
                     it.copy(
                         profiles = profiles,
-                        darkThemeEnabled = darkTheme,
                         notificationsEnabled = notifications,
                         onboardingCompleted = onboardingCompleted
                     )
@@ -155,9 +153,6 @@ class MainViewModel(
         _uiState.update { it.copy(seasonFilter = season) }
     }
 
-    fun setDarkTheme(enabled: Boolean) {
-        viewModelScope.launch { settingsStore.setDarkTheme(enabled) }
-    }
 
     fun setNotifications(enabled: Boolean) {
         viewModelScope.launch { settingsStore.setNotifications(enabled) }
@@ -205,14 +200,7 @@ data class MainUiState(
     val totalPoints: Int = 360,
     val searchQuery: String = "",
     val seasonFilter: String = "All",
-    val darkThemeEnabled: Boolean = true,
     val notificationsEnabled: Boolean = true,
     val onboardingCompleted: Boolean = false
 )
 
-private data class Quadruple<A, B, C, D>(
-    val first: A,
-    val second: B,
-    val third: C,
-    val fourth: D
-)
